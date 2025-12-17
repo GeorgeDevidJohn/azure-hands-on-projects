@@ -1,0 +1,951 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "galleries_vmgoldimage_name": {
+            "defaultValue": "vmgoldimage",
+            "type": "String"
+        },
+        "loadBalancers_vmss_lb_name": {
+            "defaultValue": "vmss-lb",
+            "type": "String"
+        },
+        "virtualNetworks_vnet_webapp_name": {
+            "defaultValue": "vnet-webapp",
+            "type": "String"
+        },
+        "publicIPAddresses_pip_webapp_name": {
+            "defaultValue": "pip-webapp",
+            "type": "String"
+        },
+        "virtualMachineScaleSets_vmss_lb_name": {
+            "defaultValue": "vmss-lb",
+            "type": "String"
+        },
+        "bastionHosts_vnet_webapp_bastion_name": {
+            "defaultValue": "vnet-webapp-bastion",
+            "type": "String"
+        },
+        "publicIPAddresses_vm_apache_golden_ip_name": {
+            "defaultValue": "vm-apache-golden-ip",
+            "type": "String"
+        },
+        "networkInterfaces_vm_apache_golden616_z1_name": {
+            "defaultValue": "vm-apache-golden616_z1",
+            "type": "String"
+        },
+        "networkSecurityGroups_vm_apache_golden_nsg_name": {
+            "defaultValue": "vm-apache-golden-nsg",
+            "type": "String"
+        },
+        "networkSecurityGroups_basicNsgvnet_webapp_nic01_name": {
+            "defaultValue": "basicNsgvnet-webapp-nic01",
+            "type": "String"
+        },
+        "virtualMachines_vm_apache_golden_externalid": {
+            "defaultValue": "/subscriptions/ae8c62f4-1269-4674-a878-d1c9cc1e3510/resourceGroups/rg-webapp-project/providers/Microsoft.Compute/virtualMachines/vm-apache-golden",
+            "type": "String"
+        },
+        "disks_vmss_lb_vmss_lb_0_OsDisk_1_078686a6930d43de846e9ecd984c3a00_externalid": {
+            "defaultValue": "/subscriptions/ae8c62f4-1269-4674-a878-d1c9cc1e3510/resourceGroups/rg-webapp-project/providers/Microsoft.Compute/disks/vmss-lb_vmss-lb_0_OsDisk_1_078686a6930d43de846e9ecd984c3a00",
+            "type": "String"
+        },
+        "disks_vmss_lb_vmss_lb_1_OsDisk_1_0fb50c95077745f4aeaa5bed113a015b_externalid": {
+            "defaultValue": "/subscriptions/ae8c62f4-1269-4674-a878-d1c9cc1e3510/resourceGroups/rg-webapp-project/providers/Microsoft.Compute/disks/vmss-lb_vmss-lb_1_OsDisk_1_0fb50c95077745f4aeaa5bed113a015b",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Compute/galleries",
+            "apiVersion": "2024-03-03",
+            "name": "[parameters('galleries_vmgoldimage_name')]",
+            "location": "canadacentral",
+            "properties": {
+                "identifier": {}
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2024-07-01",
+            "name": "[parameters('networkSecurityGroups_basicNsgvnet_webapp_nic01_name')]",
+            "location": "canadacentral",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "HTTPS",
+                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups/securityRules', parameters('networkSecurityGroups_basicNsgvnet_webapp_nic01_name'), 'HTTPS')]",
+                        "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "80",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 100,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "HTTP",
+                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups/securityRules', parameters('networkSecurityGroups_basicNsgvnet_webapp_nic01_name'), 'HTTP')]",
+                        "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "80",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 110,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2024-07-01",
+            "name": "[parameters('networkSecurityGroups_vm_apache_golden_nsg_name')]",
+            "location": "canadacentral",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "SSH",
+                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups/securityRules', parameters('networkSecurityGroups_vm_apache_golden_nsg_name'), 'SSH')]",
+                        "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 300,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "HTTP",
+                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups/securityRules', parameters('networkSecurityGroups_vm_apache_golden_nsg_name'), 'HTTP')]",
+                        "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "80",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 320,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2024-07-01",
+            "name": "[parameters('publicIPAddresses_pip_webapp_name')]",
+            "location": "canadacentral",
+            "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+            },
+            "zones": [
+                "3",
+                "1",
+                "2"
+            ],
+            "properties": {
+                "ipAddress": "4.239.196.179",
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": [],
+                "ddosSettings": {
+                    "protectionMode": "VirtualNetworkInherited"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2024-07-01",
+            "name": "[parameters('publicIPAddresses_vm_apache_golden_ip_name')]",
+            "location": "canadacentral",
+            "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+            },
+            "zones": [
+                "1"
+            ],
+            "properties": {
+                "ipAddress": "20.63.24.86",
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": [],
+                "ddosSettings": {
+                    "protectionMode": "VirtualNetworkInherited"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2024-07-01",
+            "name": "[parameters('virtualNetworks_vnet_webapp_name')]",
+            "location": "canadacentral",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.20.0.0/16"
+                    ]
+                },
+                "encryption": {
+                    "enabled": false,
+                    "enforcement": "AllowUnencrypted"
+                },
+                "privateEndpointVNetPolicies": "Disabled",
+                "subnets": [
+                    {
+                        "name": "snet-web",
+                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_webapp_name'), 'snet-web')]",
+                        "properties": {
+                            "addressPrefixes": [
+                                "10.20.1.0/24"
+                            ],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Disabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        },
+                        "type": "Microsoft.Network/virtualNetworks/subnets"
+                    }
+                ],
+                "virtualNetworkPeerings": [],
+                "enableDdosProtection": false
+            }
+        },
+        {
+            "type": "Microsoft.Compute/galleries/images",
+            "apiVersion": "2024-03-03",
+            "name": "[concat(parameters('galleries_vmgoldimage_name'), '/vm-definition')]",
+            "location": "canadacentral",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/galleries', parameters('galleries_vmgoldimage_name'))]"
+            ],
+            "properties": {
+                "hyperVGeneration": "V2",
+                "architecture": "x64",
+                "features": [
+                    {
+                        "name": "SecurityType",
+                        "value": "TrustedLaunch"
+                    },
+                    {
+                        "name": "DiskControllerTypes",
+                        "value": "SCSI"
+                    },
+                    {
+                        "name": "IsAcceleratedNetworkSupported",
+                        "value": "True"
+                    }
+                ],
+                "osType": "Linux",
+                "osState": "Generalized",
+                "identifier": {
+                    "publisher": "canonical",
+                    "offer": "ubuntu-24_04-lts",
+                    "sku": "server"
+                },
+                "recommended": {
+                    "vCPUs": {
+                        "min": 1,
+                        "max": 16
+                    },
+                    "memory": {
+                        "min": 1,
+                        "max": 32
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/bastionHosts",
+            "apiVersion": "2024-07-01",
+            "name": "[parameters('bastionHosts_vnet_webapp_bastion_name')]",
+            "location": "canadacentral",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet_webapp_name'))]"
+            ],
+            "sku": {
+                "name": "Developer"
+            },
+            "properties": {
+                "dnsName": "omnibrain.canadacentral.bastionglobal.azure.com",
+                "scaleUnits": 2,
+                "virtualNetwork": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet_webapp_name'))]"
+                },
+                "ipConfigurations": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/loadBalancers",
+            "apiVersion": "2024-07-01",
+            "name": "[parameters('loadBalancers_vmss_lb_name')]",
+            "location": "canadacentral",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_pip_webapp_name'))]"
+            ],
+            "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+            },
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "pip-webapp",
+                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_vmss_lb_name')), '/frontendIPConfigurations/pip-webapp')]",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_pip_webapp_name'))]"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "bepool-web",
+                        "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_vmss_lb_name'), 'bepool-web')]",
+                        "properties": {
+                            "loadBalancerBackendAddresses": [
+                                {
+                                    "name": "b9446659-6e21-43f2-979b-384cfb2adde0",
+                                    "properties": {}
+                                },
+                                {
+                                    "name": "a8e97fdc-506d-49a1-873b-f88d5da93f93",
+                                    "properties": {}
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "lb-rule",
+                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_vmss_lb_name')), '/loadBalancingRules/lb-rule')]",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_vmss_lb_name')), '/frontendIPConfigurations/pip-webapp')]"
+                            },
+                            "frontendPort": 80,
+                            "backendPort": 80,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 4,
+                            "protocol": "Tcp",
+                            "enableTcpReset": false,
+                            "loadDistribution": "Default",
+                            "disableOutboundSnat": true,
+                            "enableConnectionTracking": false,
+                            "backendAddressPool": {
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_vmss_lb_name'), 'bepool-web')]"
+                            },
+                            "backendAddressPools": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_vmss_lb_name'), 'bepool-web')]"
+                                }
+                            ],
+                            "probe": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_vmss_lb_name')), '/probes/health-prob')]"
+                            }
+                        }
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "health-prob",
+                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_vmss_lb_name')), '/probes/health-prob')]",
+                        "properties": {
+                            "protocol": "Http",
+                            "port": 80,
+                            "requestPath": "/",
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 1,
+                            "probeThreshold": 1,
+                            "noHealthyBackendsBehavior": "AllProbedDown"
+                        }
+                    }
+                ],
+                "inboundNatRules": [],
+                "outboundRules": [],
+                "inboundNatPools": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/loadBalancers/backendAddressPools",
+            "apiVersion": "2024-07-01",
+            "name": "[concat(parameters('loadBalancers_vmss_lb_name'), '/bepool-web')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_vmss_lb_name'))]"
+            ],
+            "properties": {
+                "loadBalancerBackendAddresses": [
+                    {
+                        "name": "b9446659-6e21-43f2-979b-384cfb2adde0",
+                        "properties": {}
+                    },
+                    {
+                        "name": "a8e97fdc-506d-49a1-873b-f88d5da93f93",
+                        "properties": {}
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2024-07-01",
+            "name": "[concat(parameters('networkSecurityGroups_basicNsgvnet_webapp_nic01_name'), '/HTTP')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_basicNsgvnet_webapp_nic01_name'))]"
+            ],
+            "properties": {
+                "protocol": "TCP",
+                "sourcePortRange": "*",
+                "destinationPortRange": "80",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 110,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2024-07-01",
+            "name": "[concat(parameters('networkSecurityGroups_vm_apache_golden_nsg_name'), '/HTTP')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_vm_apache_golden_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "TCP",
+                "sourcePortRange": "*",
+                "destinationPortRange": "80",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 320,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2024-07-01",
+            "name": "[concat(parameters('networkSecurityGroups_basicNsgvnet_webapp_nic01_name'), '/HTTPS')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_basicNsgvnet_webapp_nic01_name'))]"
+            ],
+            "properties": {
+                "protocol": "TCP",
+                "sourcePortRange": "*",
+                "destinationPortRange": "80",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 100,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2024-07-01",
+            "name": "[concat(parameters('networkSecurityGroups_vm_apache_golden_nsg_name'), '/SSH')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_vm_apache_golden_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "TCP",
+                "sourcePortRange": "*",
+                "destinationPortRange": "22",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 300,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2024-07-01",
+            "name": "[concat(parameters('virtualNetworks_vnet_webapp_name'), '/snet-web')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet_webapp_name'))]"
+            ],
+            "properties": {
+                "addressPrefixes": [
+                    "10.20.1.0/24"
+                ],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Disabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/galleries/images/versions",
+            "apiVersion": "2024-03-03",
+            "name": "[concat(parameters('galleries_vmgoldimage_name'), '/vm-definition/0.0.1')]",
+            "location": "canadacentral",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/galleries/images', parameters('galleries_vmgoldimage_name'), 'vm-definition')]",
+                "[resourceId('Microsoft.Compute/galleries', parameters('galleries_vmgoldimage_name'))]"
+            ],
+            "properties": {
+                "publishingProfile": {
+                    "targetRegions": [
+                        {
+                            "name": "Canada Central",
+                            "regionalReplicaCount": 1,
+                            "storageAccountType": "Standard_ZRS",
+                            "excludeFromLatest": false
+                        }
+                    ],
+                    "replicaCount": 1,
+                    "excludeFromLatest": false,
+                    "storageAccountType": "Standard_LRS",
+                    "replicationMode": "Full"
+                },
+                "storageProfile": {
+                    "source": {
+                        "virtualMachineId": "[parameters('virtualMachines_vm_apache_golden_externalid')]"
+                    },
+                    "osDiskImage": {
+                        "hostCaching": "ReadWrite",
+                        "source": {}
+                    }
+                },
+                "safetyProfile": {
+                    "allowDeletionOfReplicatedLocations": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2024-07-01",
+            "name": "[parameters('networkInterfaces_vm_apache_golden616_z1_name')]",
+            "location": "canadacentral",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_vm_apache_golden_ip_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_webapp_name'), 'snet-web')]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_vm_apache_golden_nsg_name'))]"
+            ],
+            "kind": "Regular",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "id": "[concat(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_vm_apache_golden616_z1_name')), '/ipConfigurations/ipconfig1')]",
+                        "type": "Microsoft.Network/networkInterfaces/ipConfigurations",
+                        "properties": {
+                            "privateIPAddress": "10.20.1.4",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_vm_apache_golden_ip_name'))]",
+                                "properties": {
+                                    "deleteOption": "Detach"
+                                }
+                            },
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_webapp_name'), 'snet-web')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4"
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": true,
+                "enableIPForwarding": false,
+                "disableTcpStateTracking": false,
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_vm_apache_golden_nsg_name'))]"
+                },
+                "nicType": "Standard",
+                "auxiliaryMode": "None",
+                "auxiliarySku": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachineScaleSets",
+            "apiVersion": "2024-11-01",
+            "name": "[parameters('virtualMachineScaleSets_vmss_lb_name')]",
+            "location": "canadacentral",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/galleries/images', parameters('galleries_vmgoldimage_name'), 'vm-definition')]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_basicNsgvnet_webapp_nic01_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_webapp_name'), 'snet-web')]",
+                "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_vmss_lb_name'), 'bepool-web')]"
+            ],
+            "sku": {
+                "name": "Standard_D2s_v3",
+                "tier": "Standard",
+                "capacity": 2
+            },
+            "zones": [
+                "1",
+                "2",
+                "3"
+            ],
+            "properties": {
+                "singlePlacementGroup": false,
+                "orchestrationMode": "Uniform",
+                "upgradePolicy": {
+                    "mode": "Manual"
+                },
+                "scaleInPolicy": {
+                    "rules": [
+                        "Default"
+                    ],
+                    "forceDeletion": false
+                },
+                "virtualMachineProfile": {
+                    "osProfile": {
+                        "computerNamePrefix": "[concat(parameters('virtualMachineScaleSets_vmss_lb_name'), 'i3')]",
+                        "adminUsername": "azureuser",
+                        "linuxConfiguration": {
+                            "disablePasswordAuthentication": false,
+                            "provisionVMAgent": true
+                        },
+                        "secrets": [],
+                        "allowExtensionOperations": true,
+                        "requireGuestProvisionSignal": true
+                    },
+                    "storageProfile": {
+                        "osDisk": {
+                            "osType": "Linux",
+                            "createOption": "FromImage",
+                            "caching": "ReadWrite",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS"
+                            },
+                            "diskSizeGB": 30
+                        },
+                        "imageReference": {
+                            "id": "[resourceId('Microsoft.Compute/galleries/images', parameters('galleries_vmgoldimage_name'), 'vm-definition')]"
+                        },
+                        "diskControllerType": "SCSI"
+                    },
+                    "networkProfile": {
+                        "networkInterfaceConfigurations": [
+                            {
+                                "name": "vnet-webapp-nic01",
+                                "properties": {
+                                    "primary": true,
+                                    "enableAcceleratedNetworking": true,
+                                    "disableTcpStateTracking": false,
+                                    "networkSecurityGroup": {
+                                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_basicNsgvnet_webapp_nic01_name'))]"
+                                    },
+                                    "dnsSettings": {
+                                        "dnsServers": []
+                                    },
+                                    "enableIPForwarding": false,
+                                    "ipConfigurations": [
+                                        {
+                                            "name": "vnet-webapp-nic01-defaultIpConfiguration",
+                                            "properties": {
+                                                "primary": true,
+                                                "subnet": {
+                                                    "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_webapp_name'), 'snet-web')]"
+                                                },
+                                                "privateIPAddressVersion": "IPv4",
+                                                "loadBalancerBackendAddressPools": [
+                                                    {
+                                                        "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_vmss_lb_name'), 'bepool-web')]"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    "diagnosticsProfile": {
+                        "bootDiagnostics": {
+                            "enabled": true
+                        }
+                    },
+                    "extensionProfile": {
+                        "extensions": []
+                    },
+                    "securityProfile": {
+                        "uefiSettings": {
+                            "secureBootEnabled": true,
+                            "vTpmEnabled": true
+                        },
+                        "securityType": "TrustedLaunch"
+                    }
+                },
+                "overprovision": false,
+                "doNotRunExtensionsOnOverprovisionedVMs": false,
+                "zoneBalance": false,
+                "platformFaultDomainCount": 1
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachineScaleSets/virtualMachines",
+            "apiVersion": "2024-11-01",
+            "name": "[concat(parameters('virtualMachineScaleSets_vmss_lb_name'), '/0')]",
+            "location": "canadacentral",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachineScaleSets', parameters('virtualMachineScaleSets_vmss_lb_name'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_basicNsgvnet_webapp_nic01_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_webapp_name'), 'snet-web')]",
+                "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_vmss_lb_name'), 'bepool-web')]",
+                "[resourceId('Microsoft.Compute/galleries/images', parameters('galleries_vmgoldimage_name'), 'vm-definition')]"
+            ],
+            "sku": {
+                "name": "Standard_D2s_v3",
+                "tier": "Standard"
+            },
+            "zones": [
+                "1"
+            ],
+            "properties": {
+                "networkProfileConfiguration": {
+                    "networkInterfaceConfigurations": [
+                        {
+                            "name": "vnet-webapp-nic01",
+                            "properties": {
+                                "primary": true,
+                                "enableAcceleratedNetworking": true,
+                                "disableTcpStateTracking": false,
+                                "networkSecurityGroup": {
+                                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_basicNsgvnet_webapp_nic01_name'))]"
+                                },
+                                "dnsSettings": {
+                                    "dnsServers": []
+                                },
+                                "enableIPForwarding": false,
+                                "ipConfigurations": [
+                                    {
+                                        "name": "vnet-webapp-nic01-defaultIpConfiguration",
+                                        "properties": {
+                                            "primary": true,
+                                            "subnet": {
+                                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_webapp_name'), 'snet-web')]"
+                                            },
+                                            "privateIPAddressVersion": "IPv4",
+                                            "loadBalancerBackendAddressPools": [
+                                                {
+                                                    "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_vmss_lb_name'), 'bepool-web')]"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "hardwareProfile": {
+                    "vmSize": "Standard_D2s_v3"
+                },
+                "resilientVMDeletionStatus": "Disabled",
+                "storageProfile": {
+                    "imageReference": {
+                        "id": "[resourceId('Microsoft.Compute/galleries/images', parameters('galleries_vmgoldimage_name'), 'vm-definition')]"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "name": "vmss-lb_vmss-lb_0_OsDisk_1_078686a6930d43de846e9ecd984c3a00",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "id": "[parameters('disks_vmss_lb_vmss_lb_0_OsDisk_1_078686a6930d43de846e9ecd984c3a00_externalid')]"
+                        }
+                    },
+                    "dataDisks": [],
+                    "diskControllerType": "SCSI"
+                },
+                "osProfile": {
+                    "computerName": "vmss-lbi3000000",
+                    "adminUsername": "azureuser",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false,
+                        "provisionVMAgent": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true
+                },
+                "securityProfile": {
+                    "uefiSettings": {
+                        "secureBootEnabled": true,
+                        "vTpmEnabled": true
+                    },
+                    "securityType": "TrustedLaunch"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[concat(resourceId('Microsoft.Compute/virtualMachineScaleSets/virtualMachines', parameters('virtualMachineScaleSets_vmss_lb_name'), '0'), '/networkInterfaces/vnet-webapp-nic01')]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachineScaleSets/virtualMachines",
+            "apiVersion": "2024-11-01",
+            "name": "[concat(parameters('virtualMachineScaleSets_vmss_lb_name'), '/1')]",
+            "location": "canadacentral",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachineScaleSets', parameters('virtualMachineScaleSets_vmss_lb_name'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_basicNsgvnet_webapp_nic01_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_webapp_name'), 'snet-web')]",
+                "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_vmss_lb_name'), 'bepool-web')]",
+                "[resourceId('Microsoft.Compute/galleries/images', parameters('galleries_vmgoldimage_name'), 'vm-definition')]"
+            ],
+            "sku": {
+                "name": "Standard_D2s_v3",
+                "tier": "Standard"
+            },
+            "zones": [
+                "2"
+            ],
+            "properties": {
+                "networkProfileConfiguration": {
+                    "networkInterfaceConfigurations": [
+                        {
+                            "name": "vnet-webapp-nic01",
+                            "properties": {
+                                "primary": true,
+                                "enableAcceleratedNetworking": true,
+                                "disableTcpStateTracking": false,
+                                "networkSecurityGroup": {
+                                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_basicNsgvnet_webapp_nic01_name'))]"
+                                },
+                                "dnsSettings": {
+                                    "dnsServers": []
+                                },
+                                "enableIPForwarding": false,
+                                "ipConfigurations": [
+                                    {
+                                        "name": "vnet-webapp-nic01-defaultIpConfiguration",
+                                        "properties": {
+                                            "primary": true,
+                                            "subnet": {
+                                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_webapp_name'), 'snet-web')]"
+                                            },
+                                            "privateIPAddressVersion": "IPv4",
+                                            "loadBalancerBackendAddressPools": [
+                                                {
+                                                    "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_vmss_lb_name'), 'bepool-web')]"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "hardwareProfile": {
+                    "vmSize": "Standard_D2s_v3"
+                },
+                "resilientVMDeletionStatus": "Disabled",
+                "storageProfile": {
+                    "imageReference": {
+                        "id": "[resourceId('Microsoft.Compute/galleries/images', parameters('galleries_vmgoldimage_name'), 'vm-definition')]"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "name": "vmss-lb_vmss-lb_1_OsDisk_1_0fb50c95077745f4aeaa5bed113a015b",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "id": "[parameters('disks_vmss_lb_vmss_lb_1_OsDisk_1_0fb50c95077745f4aeaa5bed113a015b_externalid')]"
+                        }
+                    },
+                    "dataDisks": [],
+                    "diskControllerType": "SCSI"
+                },
+                "osProfile": {
+                    "computerName": "vmss-lbi3000001",
+                    "adminUsername": "azureuser",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false,
+                        "provisionVMAgent": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true
+                },
+                "securityProfile": {
+                    "uefiSettings": {
+                        "secureBootEnabled": true,
+                        "vTpmEnabled": true
+                    },
+                    "securityType": "TrustedLaunch"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[concat(resourceId('Microsoft.Compute/virtualMachineScaleSets/virtualMachines', parameters('virtualMachineScaleSets_vmss_lb_name'), '1'), '/networkInterfaces/vnet-webapp-nic01')]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        }
+    ]
+}
