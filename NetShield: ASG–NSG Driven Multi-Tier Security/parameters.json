@@ -1,0 +1,66 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "metricAlerts_Alert_name": {
+            "value": null
+        },
+        "virtualMachines_db_vm_name": {
+            "value": null
+        },
+        "virtualMachines_app_vm_name": {
+            "value": null
+        },
+        "virtualMachines_web_vm_name": {
+            "value": null
+        },
+        "actionGroups_sentmail_name": {
+            "value": null
+        },
+        "publicIPAddresses_db_vm_ip_name": {
+            "value": null
+        },
+        "publicIPAddresses_app_vm_ip_name": {
+            "value": null
+        },
+        "publicIPAddresses_web_vm_ip_name": {
+            "value": null
+        },
+        "publicIPAddresses_webvmip578_name": {
+            "value": null
+        },
+        "publicIPAddresses_webvmip841_name": {
+            "value": null
+        },
+        "networkInterfaces_db_vm570_z1_name": {
+            "value": null
+        },
+        "networkInterfaces_web_vm27_z1_name": {
+            "value": null
+        },
+        "networkInterfaces_app_vm908_z1_name": {
+            "value": null
+        },
+        "virtualNetworks_NetShield_VNET_name": {
+            "value": null
+        },
+        "publicIPAddresses_web_subnet_ip_name": {
+            "value": null
+        },
+        "applicationSecurityGroups_ASG_App_name": {
+            "value": null
+        },
+        "applicationSecurityGroups_ASG_Web_name": {
+            "value": null
+        },
+        "networkInterfaces_web_subnet113_z1_name": {
+            "value": null
+        },
+        "bastionHosts_NetShield_VNET_bastion_name": {
+            "value": null
+        },
+        "networkSecurityGroups_NetShield_NSG_name": {
+            "value": null
+        }
+    }
+}
